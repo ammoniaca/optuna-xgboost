@@ -65,6 +65,7 @@ class Objective:
 
     def __call__(self, trial):
         param_grid = {
+            "eval_metric": self.evaluation_score,
             # used for regression tasks when the target variable is continuous.
             "objective": "reg:squarederror",
             # number of trees (estimators) in the model
