@@ -11,8 +11,8 @@ if __name__ == "__main__":
     df = pd.read_csv('dataset_pulito_GPP.csv')
     y = df["GPP"]
 
-    # remove the 'gender' and 'city' columns
-    df.drop(columns=['nomi', 'PFT', 'GPP'], inplace=True)
+    # remove 'nomi' columns
+    df.drop(columns=['nomi', 'DATE', 'PFT', 'GPP'], inplace=True)
 
 
     # https://optuna.readthedocs.io/en/stable/reference/pruners.html

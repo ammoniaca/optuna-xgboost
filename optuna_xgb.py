@@ -131,7 +131,7 @@ class Objective:
             params=param_grid,
             dtrain=data_matrix_train,  # Data to be trained
             num_boost_round=trial.suggest_int("n_estimators", 500, 1500, step=10),  # number of boosting rounds (maximum iterations)
-            early_stopping_rounds=100,  # Activates early stopping.
+            early_stopping_rounds=30,  # Activates early stopping.
             nfold=self.cv_folds,  # number of folds in CV.
             stratified=self.set_stratified,  # perform stratified sampling.
             metrics=self.evaluation_score,
