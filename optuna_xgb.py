@@ -44,6 +44,8 @@ import numpy as np
 
 import xgboost as xgb
 
+from sklearn.model_selection import cross_val_score, RepeatedKFold, cross_validate
+
 
 class Objective:
     def __init__(self,
@@ -69,7 +71,7 @@ class Objective:
             # used for regression tasks when the target variable is continuous.
             "objective": "reg:squarederror",
             # number of trees (estimators) in the model
-            # "n_estimators": trial.suggest_int("n_estimators", 1000, 10000, step=100),
+            "n_estimators": trial.suggest_int("n_estimators", 1000, 10000, step=100),
             # type of model you will train
             "booster": trial.suggest_categorical("booster", ["gbtree", "dart"]),
             # utilizes exact where precision is paramount.
@@ -122,27 +124,39 @@ class Objective:
         data_matrix_train = xgb.DMatrix(self.X_train, label=self.y_train)
 
         # initialize the model
-        # xgb_model = xgb.XGBRegressor(**param_grid)
+        xgb_model = xgb.XGBRegressor(**param_grid)
+
+        # Create a RepeatedKFold object
+        cv = RepeatedKFold(n_splits=10, n_repeats=50)
+        # Perform repeated k-fold cross-validation
+        cv_scores = cross_val_score(
+            estimator=xgb_model,
+            X=self.X_train,
+            y=self.y_train,
+            cv=cv,
+            scoring='neg_mean_squared_error')
+        # Convert negative MSE scores to positive RMSE scores
+        rmse_scores = np.sqrt(-cv_scores)
 
         # Add a Callback for XGBoost to prune unpromising trials.
-        pruning_callback = optuna.integration.XGBoostPruningCallback(trial, f"test-{self.evaluation_score}")
+        # pruning_callback = optuna.integration.XGBoostPruningCallback(trial, f"test-{self.evaluation_score}")
 
-        trial_scores = xgb.cv(
-            params=param_grid,
-            dtrain=data_matrix_train,  # Data to be trained
-            num_boost_round=trial.suggest_int("n_estimators", 500, 1500, step=10),  # number of boosting rounds (maximum iterations)
-            early_stopping_rounds=30,  # Activates early stopping.
-            nfold=self.cv_folds,  # number of folds in CV.
-            stratified=self.set_stratified,  # perform stratified sampling.
-            metrics=self.evaluation_score,
-            shuffle=self.set_shuffle,
-            callbacks=[pruning_callback],
-            seed=self.set_seed,
-            verbose_eval=0
-        )
-
-        trail_mean_score = trial_scores['test-rmse-mean'].mean(skipna=True)
-        return trail_mean_score
+        # trial_scores = xgb.cv(
+        #     params=param_grid,
+        #     dtrain=data_matrix_train,  # Data to be trained
+        #     num_boost_round=trial.suggest_int("n_estimators", 500, 1500, step=10),  # number of boosting rounds (maximum iterations)
+        #     early_stopping_rounds=30,  # Activates early stopping.
+        #     nfold=self.cv_folds,  # number of folds in CV.
+        #     stratified=self.set_stratified,  # perform stratified sampling.
+        #     metrics=self.evaluation_score,
+        #     shuffle=self.set_shuffle,
+        #     callbacks=[pruning_callback],
+        #     seed=self.set_seed,
+        #     verbose_eval=0
+        # )
+        #
+        # trail_mean_score = trial_scores['test-rmse-mean'].mean(skipna=True)
+        # return trail_mean_score
 
 # def objective(
 #         trial: Trial,
