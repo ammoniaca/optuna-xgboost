@@ -121,7 +121,7 @@ class Objective:
 
         # Learning API data is passed using the DMatrix. DMatrix is an internal data structure that is
         # used by XGBoost, which is optimized for both memory efficiency and training speed.
-        data_matrix_train = xgb.DMatrix(self.X_train, label=self.y_train)
+        # data_matrix_train = xgb.DMatrix(self.X_train, label=self.y_train)
 
         # initialize the model
         xgb_model = xgb.XGBRegressor(**param_grid)
@@ -137,6 +137,7 @@ class Objective:
             scoring='neg_mean_squared_error')
         # Convert negative MSE scores to positive RMSE scores
         rmse_scores = np.sqrt(-cv_scores)
+        return np.mean(rmse_scores)
 
         # Add a Callback for XGBoost to prune unpromising trials.
         # pruning_callback = optuna.integration.XGBoostPruningCallback(trial, f"test-{self.evaluation_score}")
