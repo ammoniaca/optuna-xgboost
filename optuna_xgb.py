@@ -71,12 +71,14 @@ class Objective:
             # number of trees (estimators) in the model
             # "n_estimators": trial.suggest_int("n_estimators", 1000, 10000, step=100),
             # type of model you will train
-            "booster": trial.suggest_categorical("booster", ["gbtree", "dart"]),
+            # "booster": trial.suggest_categorical("booster", ["gbtree", "dart"]),
+            "booster": trial.suggest_categorical("booster", ["dart"]),
             # utilizes exact where precision is paramount.
             "tree_method": "exact",
             # "tree_method": trial.suggest_categorical("tree_method", ["auto", "exact", "approx", "hist"]),
-            # step size at each boosting iteration.
-            "learning_rate": trial.suggest_float("eta", 1e-8, 1.0, log=True),
+            # step size at each boosting iteration. 1e-8
+            # "learning_rate": trial.suggest_float("eta", 1e-8, 1.0, log=True),
+            "learning_rate": trial.suggest_float("eta", 1e-3, 1.0, log=True),
             # L2 regularization weight.
             "lambda": trial.suggest_float("lambda", 1e-8, 1.0, log=True),
             # L1 regularization weight.
@@ -131,7 +133,7 @@ class Objective:
             params=param_grid,
             dtrain=data_matrix_train,  # Data to be trained
             num_boost_round=trial.suggest_int("n_estimators", 500, 1500, step=10),  # number of boosting rounds (maximum iterations)
-            early_stopping_rounds=30,  # Activates early stopping.
+            early_stopping_rounds=100,  # Activates early stopping.
             nfold=self.cv_folds,  # number of folds in CV.
             stratified=self.set_stratified,  # perform stratified sampling.
             metrics=self.evaluation_score,
